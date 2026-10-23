@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Application Tracker</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    margin: 0;
+    color: #1e293b;
+}
+
+header {
+    background: #2563eb;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 25px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+}
+
+input, select, button {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+
+input, select {
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.delete {
+    background: #dc2626;
+}
+
+.summary {
+    background: #dbeafe;
+    padding: 10px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+th {
+    background: #dbeafe;
+}
+
+.table-box {
+    overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 12px;
+    }
+
+    input, select {
+        width: 95%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Job Application Tracker</h1>
+    <p>Track Your Career Progress</p>
+</header>
+
+<div class="container">
+
+    <h2>Add Job Application</h2>
+
+    <form id="jobForm">
+        <input id="company" placeholder="Company Name" required>
+        <input id="role" placeholder="Job Role" required>
+        <input id="date" type="date" required>
+
+        <select id="status">
+            <option>Applied</option>
+            <option>Interview</option>
+            <option>Selected</option>
+            <option>Rejected</option>
+        </select>
+
+        <button type="submit">Add Application</button>
+    </form>
+
+    <h2>My Applications</h2>
+
+    <div class="summary">
+        Total: <span id="total">0</span> |
+        Interviews: <span id="interviews">0</span> |
+        Selected: <span id="selected">0</span>
+    </div>
+
+    <div class="table-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Job Role</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="jobList"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+let jobs = JSON.parse(localStorage.getItem("jobs") || "[]");
+
+const form = document.getElementById("jobForm");
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    jobs.push({
+        id: Date.now(),
+        company: document.getElementById("company").value.trim(),
+        role: document.getElementById("role").value.trim(),
+        date: document.getElementById("date").value,
+        status: document.getElementById("status").value
+    });
+
+    saveJobs();
+    displayJobs();
+    form.reset();
+});
+
+function saveJobs() {
+    localStorage.setItem("jobs", JSON.stringify(jobs));
+}
+
+function displayJobs() {
+    const list = document.getElementById("jobList");
+    list.innerHTML = "";
+
+    jobs.forEach(function(job) {
+        const row = document.createElement("tr");
+
+        [job.company, job.role, job.date, job.status].forEach(function(value) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        const cell = document.createElement("td");
+        const btn = document.createElement("button");
+
+        btn.textContent = "Delete";
+        btn.className = "delete";
+
+        btn.onclick = function() {
+            jobs = jobs.filter(item => item.id !== job.id);
+            saveJobs();
+            displayJobs();
+        };
+
+        cell.appendChild(btn);
+        row.appendChild(cell);
+        list.appendChild(row);
+    });
+
+    document.getElementById("total").textContent = jobs.length;
+
+    document.getElementById("interviews").textContent =
+        jobs.filter(job => job.status === "Interview").length;
+
+    document.getElementById("selected").textContent =
+        jobs.filter(job => job.status === "Selected").length;
+}
+
+displayJobs();
+</script>
+
+</body>
+</html>
